@@ -17,7 +17,7 @@ A Skill must fix a failure seen in a baseline run without it ([ADR 0004](docs/ad
 5. **Write the Skill** to address the failures you saw. Create `plugins/<plugin>/skills/<skill-name>/SKILL.md` from the template below.
 6. **Measure it:** `zsh scripts/eval.zsh <plugin> <skill-name> measure`. The Skill must raise the score (a positive Δ) on the cases that failed, and must not fire on the should-not-trigger case. Put the score table in the PR.
 7. Put any bundled scripts in the Skill's folder. Write them in zsh with a `.zsh` extension (CI runs `zsh -n` on them). Any `.sh`/`.bash` scripts must pass `shellcheck`. Add fixture tests under `tests/<script-name>/` (see `tests/run.zsh`).
-8. Run `node scripts/check-skills.mjs`, `claude plugin validate .` and `zsh tests/run.zsh` locally.
+8. Enable the pre-commit hook once per clone with `git config core.hooksPath .githooks`. It runs `node scripts/check-skills.mjs`, `claude plugin validate` and `zsh tests/run.zsh` on every commit.
 
 Eval runs use your own Claude credentials and cost money. [docs/evals.md](docs/evals.md) covers flags, cost caps, the case and grader format, and known gotchas.
 
@@ -34,7 +34,7 @@ Frontmatter may use only these portable fields: `name`, `description`, `license`
 ```markdown
 ---
 name: fleet-example-skill
-description: One or two sentences on what this Skill does and when to use it. Lead with the trigger.
+description: Use when <the situations, symptoms and file types that should trigger this Skill>.
 license: MIT
 metadata:
   verified-against: "Fleet 4.95"
@@ -55,6 +55,7 @@ metadata:
 ...
 ```
 
+- `description`: starts with "Use when" and names only the triggers, never the Skill's steps. An agent that reads a summary of the steps may follow the summary and skip the body. CI checks the prefix.
 - `verified-against`: the Platform version you tested with. For Jamf Pro Skills, include the `jamf-cli` version too (`"Jamf Pro 11.x, jamf-cli 1.38"`). Shared Skills name the macOS/iOS versions.
 - `verified-on`: the date you last checked the Skill against a live Platform (`YYYY-MM-DD`). CI warns once this is more than about 6 months old.
 
@@ -63,6 +64,10 @@ metadata:
 - **Read Skill:** the agent never changes a live Platform itself.
 - **Write Skill:** the agent does change a live Platform. It must present a Change Plan (which object, what changes, its scope, how many devices are affected) and wait for explicit confirmation. For Fleet, prefer GitOps over direct API writes.
 - Write Skills require maintainer review (see `.github/CODEOWNERS`).
+
+## Review
+
+Reviewers apply [CODING_STANDARDS.md](CODING_STANDARDS.md): the judgement calls no check can make.
 
 ## Testing
 

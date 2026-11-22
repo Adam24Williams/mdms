@@ -1,0 +1,38 @@
+#!/bin/zsh
+# Runs the repo's local checks before each commit. Enable once per clone:
+#   git config core.hooksPath .githooks
+# Skip once with `git commit --no-verify`.
+emulate -L zsh
+
+cd "$(git rev-parse --show-toplevel)" || exit 1
+failed=0
+# Run a check quietly; print its output only if it fails.
+step() {
+  local name=$1 out; shift
+  out=$("$@" 2>&1) && return
+  print -r -- "pre-commit: $name failed"; print -r -- "$out"; failed=1
+}
+validate_all() {
+  local t
+  for t in . plugins/*/; do claude plugin validate "$t" || return 1; done
+}
+
+step "check-skills" node scripts/check-skills.mjs
+
+if command -v claude >/dev/null; then
+  step "plugin validate" validate_all
+else
+  print "pre-commit: claude CLI not found; skipping plugin validate (CI still runs it)"
+fi
+
+for f in $(git ls-files '*.zsh') .githooks/pre-commit; do
+  zsh -n "$f" || { print -r -- "pre-commit: zsh syntax error in $f"; failed=1 }
+done
+
+if [[ $OSTYPE == darwin* ]]; then
+  step "script fixture tests" zsh tests/run.zsh
+else
+  print "pre-commit: not macOS; skipping script fixture tests (CI still runs them)"
+fi
+
+(( failed == 0 )) || { print "pre-commit: checks failed; fix them or commit with --no-verify"; exit 1 }

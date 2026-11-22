@@ -21,9 +21,16 @@ function frontmatter(text) {
   const keys = {};
   const metadata = {};
   let current = null;
+  let block = false; // inside a `>` or `|` block scalar
   for (const line of m[1].split(/\r?\n/)) {
     const top = line.match(/^([A-Za-z0-9_-]+):\s*(.*)$/);
-    if (top) { current = top[1]; keys[current] = top[2].trim(); continue; }
+    if (top) {
+      current = top[1];
+      block = /^[>|][+-]?$/.test(top[2].trim());
+      keys[current] = block ? "" : top[2].trim().replace(/^["']|["']$/g, "");
+      continue;
+    }
+    if (block) { keys[current] = (keys[current] + " " + line.trim()).trim(); continue; }
     const child = line.match(/^\s+([A-Za-z0-9_-]+):\s*(.*)$/);
     if (child && current === "metadata") metadata[child[1]] = child[2].trim().replace(/^["']|["']$/g, "");
   }
@@ -51,6 +58,10 @@ for (const plugin of readdirSync(root)) {
     if (keys.name !== skill) error(file, `name "${keys.name ?? ""}" must equal folder name "${skill}"`);
     if (!skill.startsWith(prefix)) error(file, `name must start with "${prefix}"`);
     if (!keys.description) error(file, "description is required");
+    else {
+      if (!/^Use when\b/.test(keys.description)) error(file, 'description must start with "Use when" and state only when to use the Skill');
+      if (keys.description.length > 1024) error(file, `description is ${keys.description.length} characters; the limit is 1024`);
+    }
     if (!metadata["verified-against"]) error(file, "metadata.verified-against is required");
 
     const on = metadata["verified-on"];
