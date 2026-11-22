@@ -30,7 +30,8 @@ for f in $(git ls-files '*.zsh') .githooks/pre-commit; do
 done
 
 if [[ $OSTYPE == darwin* ]]; then
-  step "script fixture tests" zsh tests/run.zsh
+  # Run as CI does: check-skills prints ::error annotations when GITHUB_ACTIONS is set.
+  step "script fixture tests" env GITHUB_ACTIONS=true zsh tests/run.zsh
 else
   print "pre-commit: not macOS; skipping script fixture tests (CI still runs them)"
 fi

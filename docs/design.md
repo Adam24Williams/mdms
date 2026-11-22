@@ -67,8 +67,12 @@ Decided in [ADR 0006](adr/0006-environment-profile-file-gated-on-platform-skill.
   - Platform and version, hosting (Jamf Cloud or on-prem; Fleet self-hosted or Fleet-managed) and license tier.
   - Managed OS families and minimum supported OS versions.
   - Terraform provider and CLI, and whether Fleet GitOps is used and where.
-  - Naming conventions, and whether a sandbox exists.
+  - Naming Conventions, and whether a sandbox exists.
   - A `recorded-on` date for each fact.
+- **Conventions:** a Skill follows a recorded Convention over its own default, and uses its default only when the profile records none.
+  - Only the Setup Interview writes naming Conventions. It infers them from files already in the Team Repo, such as Terraform resource `name` values and script filenames, and asks the Admin when those don't settle it. It never lists object names from an Instance, which would be inventory.
+  - A naming Convention records, for each object type the team names (policies, smart groups, configuration profiles, scripts, packages, extension attributes, Terraform resource labels), a pattern with one or two invented examples, and how the team marks test or sandbox objects.
+  - Where the Admin has no Convention, the Setup Interview may offer a default, sourced as described in [Quality](#quality).
 - **Never in the file:** credentials, server URLs or tenant names (those live in environment variables), device or user identifiers, and device counts.
 - **Re-running:** the Setup Interview re-detects what it can, updates the file in place, shows the Admin which facts changed and asks only about facts that are new or missing.
 - **Triggering:** the Setup Interview runs only on an explicit request. Other Skills mention it by name and never invoke it.
@@ -81,6 +85,7 @@ Decided in [ADR 0006](adr/0006-environment-profile-file-gated-on-platform-skill.
 ## Quality
 
 - Each Skill records its Verified Version in `metadata`. For Jamf Skills that includes the `jamf-cli` version. Terraform Skills record the provider, Terraform CLI and Jamf Pro versions instead. Their plan-review evals use text plans recorded from the maintainer's Jamf Pro sandbox, with secrets and identifiers scrubbed. CI flags any Skill that hasn't been re-verified in about 6 months.
+- A default practice a Skill offers, such as a naming pattern, smart group structure or policy design, cites Jamf's documentation or a named community source (a JNUC talk, the Mac Admins community), recorded in `docs/research/`. The maintainer's own practice may stand in when the research file marks it as opinion.
 - CI runs offline checks only: frontmatter rules, Verified Version staleness, `shellcheck`, `plutil -lint` on sample profiles, and script tests against recorded API responses.
 - Live verification is manual before each release, against the maintainer's Jamf Pro sandbox and a local Fleet. Fleet tests run on `fleetctl preview`, which is Fleet Free. Skills that touch Premium features also run with a dev Premium license. Apple MDM test setup is deferred until a Fleet MDM Skill is planned.
 - Each Skill has 3–5 eval cases for `claude plugin eval`, under `plugins/<plugin>/evals/<skill>/`, including at least one where the Skill should not trigger.
@@ -102,11 +107,11 @@ docs/adr/  docs/research/  docs/design.md  GLOSSARY.md  CONTRIBUTING.md  README.
 
 These Skills are candidates: each ships only if it fixes a baseline failure ([ADR 0004](adr/0004-baseline-gate.md)). All first-release Skills are Read Skills. Each Plugin ships as `v0.1.0` when ready, in this order:
 
-1. **`apple-shared`:** `apple-configuration-profiles` (authoring and linting payloads), `apple-declarations` (DDM authoring), `apple-management-scripts` (zsh conventions, exit codes, logging).
+1. **`apple-shared`:** `apple-configuration-profiles` (authoring and linting payloads), `apple-declarations` (DDM authoring, including software-update deadlines the End User sees), `apple-management-scripts` (zsh style, header and inline comments, exit codes, logging, and dialogs a script shows the End User).
 2. **`fleet`** (after a local Fleet instance is running): `fleet-queries-and-policies` (osquery), `fleet-gitops` (YAML authoring), `fleet-hosts-and-labels` (lookups via API/`fleetctl`).
-3. **`jamf-pro`:** `jamf-pro-extension-attributes`, `jamf-pro-smart-group-criteria` (smart groups and advanced searches), `jamf-pro-policy-scope-review`, `jamf-pro-api-roles` (least-privilege API role design). Then the Terraform Skills, in this order:
+3. **`jamf-pro`:** `jamf-pro-extension-attributes`, `jamf-pro-smart-group-criteria` (smart group criteria and structure, and advanced searches), `jamf-pro-policy-design` (designing and reviewing policies: scope, trigger, frequency, execution order, script parameters, and End User impact such as restarts, deferrals and timing), `jamf-pro-api-roles` (least-privilege API role design). Then the Terraform Skills, in this order:
    - `jamf-pro-terraform-plan-review`: flags deletes and replacements that reach devices (with scope), Destructive Command actions, drift from GUI edits, post-import removal noise and forced replacements.
-   - `jamf-pro-terraform-authoring`: `jamfplatform` HCL, covering provider pinning, OAuth client and least-privilege permissions, references between objects, scripts kept out of inline strings, and Jamf Cloud propagation delay.
+   - `jamf-pro-terraform-authoring`: `jamfplatform` HCL, covering provider pinning, OAuth client and least-privilege permissions, references between objects, scripts kept out of inline strings, Jamf Cloud propagation delay, and modules (where a module's boundary goes, which values become inputs, and when a small Instance is better off without modules).
    - `jamf-pro-terraform-adoption`: bringing an existing instance under Terraform with jamformer (run by the Admin), cleaning up generated HCL, the first plan after import, and moving a configuration from `jamfpro` to `jamfplatform` (a provider move, not an instance migration).
 
 A Plugin's Setup Interview ships alongside its first Skill whose baseline fails because an environment fact is missing (see [Environment Profile](#environment-profile)).
