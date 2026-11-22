@@ -1,0 +1,26 @@
+{
+  "name": "mdms",
+  "owner": {
+    "name": "Adam24Williams"
+  },
+  "metadata": {
+    "description": "Agent skills for device-management admins running Jamf Pro and Fleet."
+  },
+  "plugins": [
+    {
+      "name": "apple-shared",
+      "source": "./plugins/apple-shared",
+      "description": "Platform-independent Apple device management skills: configuration profiles, declarations, and management scripts."
+    },
+    {
+      "name": "jamf-pro",
+      "source": "./plugins/jamf-pro",
+      "description": "Jamf Pro authoring and design skills. Pairs with jamf-cli-skills for live operations."
+    },
+    {
+      "name": "fleet",
+      "source": "./plugins/fleet",
+      "description": "Fleet skills: osquery queries and policies, GitOps, hosts and labels."
+    }
+  ]
+}

@@ -1,0 +1,9 @@
+{
+  "name": "apple-shared",
+  "version": "0.0.0",
+  "description": "Platform-independent Apple device management skills: configuration profiles, declarations, and management scripts.",
+  "author": { "name": "Adam24Williams" },
+  "repository": "https://github.com/Adam24Williams/mdms",
+  "license": "MIT",
+  "keywords": ["mdm", "apple", "macos", "configuration-profiles", "ddm"]
+}

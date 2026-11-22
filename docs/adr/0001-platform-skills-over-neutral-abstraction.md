@@ -1,0 +1,3 @@
+# Platform Skills over a vendor-neutral abstraction
+
+Skills are written per Platform (Jamf Pro, Fleet) in each Platform's own vocabulary, plus a small set of Shared Skills for subjects that are genuinely identical across Platforms (configuration profile payloads, declarations, device scripts). We rejected a single vendor-neutral layer (e.g. one "deploy-configuration-profile" Skill with per-Platform adapters) because the Platforms' core models differ too much — Jamf smart groups and policies versus Fleet labels, teams, and GitOps — and a neutral layer would either leak those differences or hide capabilities Admins rely on.

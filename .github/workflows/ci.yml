@@ -1,0 +1,50 @@
+name: CI
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+
+permissions:
+  contents: read
+
+jobs:
+  checks:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+
+      - name: Validate manifests
+        run: |
+          npx -y @anthropic-ai/claude-code plugin validate .
+          for p in plugins/*/; do npx -y @anthropic-ai/claude-code plugin validate "$p"; done
+
+      - name: Check Skills
+        run: node scripts/check-skills.mjs
+
+      - name: shellcheck sh/bash scripts
+        run: |
+          files=$(find plugins -type f \( -name '*.sh' -o -name '*.bash' \))
+          if [ -z "$files" ]; then echo "No sh/bash scripts to check"; exit 0; fi
+          echo "$files" | xargs shellcheck
+
+  macos:
+    runs-on: macos-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: zsh syntax check
+        run: |
+          files=$(find plugins -type f -name '*.zsh')
+          if [ -z "$files" ]; then echo "No zsh scripts to check"; exit 0; fi
+          for f in $files; do zsh -n "$f"; done
+
+      - name: plutil -lint sample profiles
+        run: |
+          files=$(find plugins -type f \( -name '*.mobileconfig' -o -name '*.plist' \))
+          if [ -z "$files" ]; then echo "No profiles to lint"; exit 0; fi
+          echo "$files" | xargs plutil -lint

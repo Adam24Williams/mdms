@@ -1,0 +1,9 @@
+{
+  "name": "jamf-pro",
+  "version": "0.0.0",
+  "description": "Jamf Pro authoring and design skills. Pairs with jamf-cli-skills for live operations.",
+  "author": { "name": "Adam24Williams" },
+  "repository": "https://github.com/Adam24Williams/mdms",
+  "license": "MIT",
+  "keywords": ["mdm", "jamf", "jamf-pro", "macos"]
+}

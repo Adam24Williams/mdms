@@ -1,0 +1,3 @@
+# No Skill ever sends a Destructive Command
+
+No Skill — Read or Write, in any Plugin — sends a command that erases, locks, or unmanages devices (EraseDevice, DeviceLock, MDM profile removal, wipe) or bulk-deletes device records, even though the underlying tools can (`jamf-cli` exposes erase and lock; Fleet's API can wipe and lock). Confirmation prompts are not enough protection here: one mis-scoped command can take a fleet offline, and an agent can be wrong about scope while sounding certain. An Admin who needs these commands sends them in the Platform's own console. Contributions that add them are declined.

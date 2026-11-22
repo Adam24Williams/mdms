@@ -1,0 +1,9 @@
+{
+  "name": "fleet",
+  "version": "0.0.0",
+  "description": "Fleet skills: osquery queries and policies, GitOps, hosts and labels.",
+  "author": { "name": "Adam24Williams" },
+  "repository": "https://github.com/Adam24Williams/mdms",
+  "license": "MIT",
+  "keywords": ["mdm", "fleet", "fleetdm", "osquery", "gitops"]
+}
