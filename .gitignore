@@ -1,2 +1,2 @@
 .DS_Store
-plugins/*/evals/results/
+plugins/*/evals/**/results/

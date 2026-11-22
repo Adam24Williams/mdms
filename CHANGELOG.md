@@ -4,7 +4,9 @@ Each Plugin is versioned independently with semver. A major bump is required for
 
 ## apple-shared
 
-_Unreleased._
+### Unreleased
+
+- Added `apple-configuration-profiles`: grounds payloads in Apple's current device-management schema (deprecations, MDM-only delivery, enrollment requirements) and lints profile structure with `scripts/lint-profile.zsh`.
 
 ## jamf-pro
 

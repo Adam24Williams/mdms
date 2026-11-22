@@ -4,14 +4,32 @@ Read [GLOSSARY.md](GLOSSARY.md) and [docs/design.md](docs/design.md) first. Use 
 
 ## Adding a Skill
 
+A Skill must fix a failure seen in a baseline run without it ([ADR 0004](docs/adr/0004-baseline-gate.md)). Write the evals first, and write the Skill only if the baseline fails them.
+
 1. Choose the Plugin:
    - Shared Skill → `apple-shared`
    - Platform Skill → `jamf-pro` or `fleet`
 2. Name the Skill with its Plugin's prefix (`apple-`, `jamf-pro-` or `fleet-`). The folder name must equal the `name`.
-3. Create `plugins/<plugin>/skills/<skill-name>/SKILL.md` from the template below.
-4. Add 3–5 eval cases under `plugins/<plugin>/evals/<skill-name>/`. At least one case must be a prompt where the Skill should **not** trigger. Run the cases with `claude plugin eval plugins/<plugin>`.
-5. Put any bundled scripts in the Skill's folder. Write them in zsh with a `.zsh` extension (CI runs `zsh -n` on them). Any `.sh`/`.bash` scripts must pass `shellcheck`.
-6. Run `scripts/check-skills.mjs` and `claude plugin validate .` locally.
+3. **Write the evals first.** Add 3–5 eval cases under `plugins/<plugin>/evals/<skill-name>/`.
+   - At least one case must be a prompt where the Skill should **not** trigger.
+   - Base cases on mistakes you've actually seen an agent make, plus anything that depends on facts newer than the model's training (new OS releases, Platform releases, deprecations).
+4. **Run the baseline**, with no Skill present:
+   ```bash
+   claude plugin eval plugins/<plugin> --eval-dir evals/<skill-name> \
+     --allow-tools Bash WebFetch Write Edit --runs 2 --ablation none --no-publish
+   ```
+   Read the failing runs, not just the scores. If every outcome grader passes, stop: there is nothing for a Skill to fix. Either write harder cases or drop the Skill and note why in the PR.
+5. **Write the Skill** to address the failures you saw. Create `plugins/<plugin>/skills/<skill-name>/SKILL.md` from the template below.
+6. **Measure it:**
+   ```bash
+   claude plugin eval plugins/<plugin> --eval-dir evals/<skill-name> \
+     --allow-tools Bash WebFetch Write Edit --ablation with-without --no-publish
+   ```
+   The Skill must raise the score (a positive Δ) on the cases that failed, and must not fire on the should-not-trigger case. Put the results table in the PR.
+7. Put any bundled scripts in the Skill's folder. Write them in zsh with a `.zsh` extension (CI runs `zsh -n` on them). Any `.sh`/`.bash` scripts must pass `shellcheck`.
+8. Run `node scripts/check-skills.mjs` and `claude plugin validate .` locally.
+
+`--allow-tools` grants only the gated tools the cases list in `allowed_tools`. Eval runs use your own Claude credentials and cost money, so pass `--max-cost-usd` to cap a run. The default LLM judge (Haiku) sometimes fails a correct answer, so read the evidence for every failing grader before you trust a score.
 
 ### What we don't accept
 

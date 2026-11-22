@@ -67,7 +67,7 @@ docs/adr/  docs/design.md  GLOSSARY.md  CONTRIBUTING.md  README.md  CHANGELOG.md
 
 ## Roadmap
 
-All first-release Skills are Read Skills. Each Plugin ships as `v0.1.0` when ready, in this order:
+These Skills are candidates: each ships only if it fixes a baseline failure ([ADR 0004](adr/0004-baseline-gate.md)). All first-release Skills are Read Skills. Each Plugin ships as `v0.1.0` when ready, in this order:
 
 1. **`apple-shared`:** `apple-configuration-profiles` (authoring and linting payloads), `apple-declarations` (DDM authoring), `apple-management-scripts` (zsh conventions, exit codes, logging).
 2. **`fleet`** (after a local Fleet instance is running): `fleet-queries-and-policies` (osquery), `fleet-gitops` (YAML authoring), `fleet-hosts-and-labels` (lookups via API/`fleetctl`).
