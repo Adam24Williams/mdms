@@ -32,7 +32,7 @@ Settled design for the `mdms` Marketplace. Vocabulary is defined in [GLOSSARY.md
 - Skill names carry a Platform prefix (`jamf-pro-`, `fleet-`, `apple-`), so they don't collide outside Claude Code's plugin namespacing.
 - Platform Skills refer to Shared Skills by name. There are no hard install dependencies between Plugins.
 - `jamf-pro` complements the Companion Plugin `jamf-cli-skills` and doesn't duplicate it ([ADR 0002](adr/0002-complement-jamf-cli-skills.md)).
-- Terraform Skills live in `jamf-pro` with a `jamf-pro-terraform-` prefix. They write new HCL for `jamf/jamfplatform` and review configurations and Terraform plans from both `jamfplatform` and `deploymenttheory/jamfpro`. Scope is Jamf Pro, counting Jamf's blueprints, device groups and compliance benchmarks as part of the Jamf Pro Platform ([ADR 0005](adr/0005-terraform-skills-target-jamfplatform.md)). HCL stays CLI-neutral: verified on Terraform, expected to work on OpenTofu.
+- Terraform Skills live in `jamf-pro` with a `jamf-pro-terraform-` prefix. They write new HCL for `jamf/jamfplatform` and review configurations and Terraform plans from both `jamfplatform` and `deploymenttheory/jamfpro`. Scope is Jamf Pro, counting Jamf's blueprints, device groups and compliance benchmarks as part of the Jamf Pro Platform ([ADR 0005](adr/0005-terraform-skills-target-jamfplatform.md)). HCL stays CLI-neutral: verified on Terraform, expected to work on OpenTofu. Provider facts, gotchas and open questions are in [docs/research/terraform-providers.md](research/terraform-providers.md); read it before writing a Terraform Skill or its evals.
 
 ## Safety
 
@@ -63,7 +63,7 @@ plugins/
   apple-shared/  .claude-plugin/plugin.json, skills/<skill>/SKILL.md, evals/<skill>/<case>/ (claude plugin eval format)
   jamf-pro/      (same)
   fleet/         (same)
-docs/adr/  docs/design.md  GLOSSARY.md  CONTRIBUTING.md  README.md  CHANGELOG.md  LICENSE
+docs/adr/  docs/research/  docs/design.md  GLOSSARY.md  CONTRIBUTING.md  README.md  CHANGELOG.md  LICENSE
 .github/workflows/
 ```
 

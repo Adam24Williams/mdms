@@ -4,6 +4,6 @@ No Skill — Read or Write, in any Plugin — sends a command that erases, locks
 
 ## Consequences
 
-- Authoring counts as sending. No Skill writes Terraform that issues a Destructive Command, such as `jamfplatform` device actions (`jamfplatform_device_erase`, `jamfplatform_device_unmanage`, lock, lost mode, clear passcode), and Skills advise against granting the `destructive-device-actions` API permission.
-- Restart, shutdown and setting or clearing a recovery lock are not Destructive Commands, but plan review flags them for attention.
+- Authoring counts as sending. No Skill writes Terraform that issues a Destructive Command, such as the `jamfplatform` actions `jamfplatform_device_erase`, `jamfplatform_device_unmanage`, `jamfplatform_pro_lock_device`, `jamfplatform_pro_enable_lost_mode`, `jamfplatform_pro_clear_passcode` and `jamfplatform_pro_delete_user`, and Skills advise against granting the `destructive-device-actions` API permission.
+- Restart, shutdown, setting or clearing a recovery lock, clearing a restrictions password, flushing MDM commands and logging out a user are not Destructive Commands, but plan review flags them for attention.
 - Terraform plan review treats any Destructive Command, and any delete or replacement of a resource that reaches devices (configuration profiles, policies, prestages, blueprints), as a blocking warning. Deletes the Admin intends are allowed, but always surfaced with their device scope.

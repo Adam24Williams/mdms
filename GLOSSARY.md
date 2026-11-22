@@ -49,7 +49,7 @@ The set of creates, updates, replacements and deletes that Terraform computes fo
 _Avoid_: Change Plan, diff
 
 **Destructive Command**:
-A device command that erases, locks (including Lost Mode), clears passcodes on, or unmanages devices, or bulk-deletes device records; no Skill ever sends one.
+A device command that erases, locks (including Lost Mode), clears passcodes on, or unmanages devices, deletes a user and its data from a device, or bulk-deletes device records; no Skill ever sends one.
 _Avoid_: dangerous action, risky command
 
 **Verified Version**:

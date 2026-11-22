@@ -7,6 +7,11 @@ import { join } from "node:path";
 const ALLOWED_KEYS = new Set(["name", "description", "license", "compatibility", "metadata", "allowed-tools"]);
 const PREFIX = { "apple-shared": "apple-", "jamf-pro": "jamf-pro-", fleet: "fleet-" };
 const STALE_DAYS = 183;
+// ADR 0002: Terraform Skills pre-approve only commands that never contact the Platform.
+const TF_SAFE = /^(terraform|tofu) (fmt|validate|init -backend=false)\b/;
+// ADR 0003: action types that issue a Destructive Command. See docs/research/terraform-providers.md.
+const DESTRUCTIVE_ACTION = /^\s*action\s+"(jamfplatform_device_erase|jamfplatform_device_unmanage|jamfplatform_pro_lock_device|jamfplatform_pro_enable_lost_mode|jamfplatform_pro_clear_passcode|jamfplatform_pro_delete_user)"/gm;
+const HCL_FILE = /\.(tf|tftpl|hcl|md)$/;
 const gh = !!process.env.GITHUB_ACTIONS;
 
 let errors = 0;
@@ -31,13 +36,45 @@ function frontmatter(text) {
       continue;
     }
     if (block) { keys[current] = (keys[current] + " " + line.trim()).trim(); continue; }
+    const item = line.match(/^\s*-\s+(.*)$/); // YAML list item, e.g. under allowed-tools
+    if (item && current && current !== "metadata") {
+      keys[current] = (keys[current] + " " + item[1].trim().replace(/^["']|["']$/g, "")).trim();
+      continue;
+    }
     const child = line.match(/^\s+([A-Za-z0-9_-]+):\s*(.*)$/);
     if (child && current === "metadata") metadata[child[1]] = child[2].trim().replace(/^["']|["']$/g, "");
   }
   return { keys, metadata };
 }
 
-const root = "plugins";
+// Every file under dir, recursively.
+function walk(dir) {
+  return readdirSync(dir, { withFileTypes: true }).flatMap((e) =>
+    e.isDirectory() ? walk(join(dir, e.name)) : [join(dir, e.name)]);
+}
+
+// Tool entries in an `allowed-tools` string, e.g. "Read Bash(terraform fmt:*)".
+const toolEntries = (s) => s.match(/[^\s,()]+(\([^)]*\))?/g) ?? [];
+
+function checkTerraform(skill, dir, file, keys) {
+  const terraformSkill = skill.includes("-terraform-");
+  for (const entry of toolEntries(keys["allowed-tools"] ?? "")) {
+    const bash = entry.match(/^Bash(?:\((.*)\))?$/);
+    if (!bash) continue;
+    const cmd = (bash[1] ?? "").trim();
+    if (terraformSkill && (cmd === "" || cmd === "*")) {
+      error(file, `allowed-tools pre-approves all of Bash; Terraform Skills may pre-approve only fmt, validate and init -backend=false (ADR 0002)`);
+    } else if (/\b(terraform|tofu)\b/.test(cmd) && !TF_SAFE.test(cmd)) {
+      error(file, `allowed-tools pre-approves "${entry}"; only fmt, validate and init -backend=false may be pre-approved (ADR 0002)`);
+    }
+  }
+  for (const f of walk(dir).filter((f) => HCL_FILE.test(f))) {
+    for (const m of readFileSync(f, "utf8").matchAll(DESTRUCTIVE_ACTION))
+      error(f, `declares action "${m[1]}", which sends a Destructive Command (ADR 0003)`);
+  }
+}
+
+const root = process.argv[2] ?? "plugins";
 for (const plugin of readdirSync(root)) {
   const skillsDir = join(root, plugin, "skills");
   if (!statSync(join(root, plugin)).isDirectory() || !existsSync(skillsDir)) continue;
@@ -63,6 +100,7 @@ for (const plugin of readdirSync(root)) {
       if (keys.description.length > 1024) error(file, `description is ${keys.description.length} characters; the limit is 1024`);
     }
     if (!metadata["verified-against"]) error(file, "metadata.verified-against is required");
+    checkTerraform(skill, dir, file, keys);
 
     const on = metadata["verified-on"];
     if (!on || !/^\d{4}-\d{2}-\d{2}$/.test(on) || isNaN(Date.parse(on))) {
