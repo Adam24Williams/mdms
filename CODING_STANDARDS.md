@@ -14,13 +14,18 @@ These are for review. They cover judgement calls that no check can make. Mechani
 ## Language
 
 - Use [GLOSSARY.md](GLOSSARY.md) terms in Skills, docs and commit messages, and flag the words it lists under _Avoid_. A new domain term needs a glossary entry in the same PR.
+- **One sense per term.** A glossary term keeps its meaning everywhere it appears, including inside a compound or a product name ("Platform Services" against **Platform**). A second sense needs a new term or rewording. Watch for words that an ADR has already ruled on, such as "migration" in ADR 0002.
+- **New rules go in ADRs.** Flag a PR that adds a rule about who runs what, or when, to a glossary entry instead of an ADR. Existing entries stay as they are.
+- **Claims trace to a source.** Dates, versions and provider behaviour in docs and ADRs match a cited source or [docs/research/](docs/research/). Flag any that are inferred and presented as fact.
 
 ## Safety
 
 - **Write Skills** present a Change Plan (object, change, scope, affected device count) and stop for explicit confirmation before acting. For Fleet, they prefer GitOps over direct API writes.
 - **No Destructive Commands**, including through a tool that offers them, such as `jamf-cli` erase or lock ([ADR 0003](docs/adr/0003-no-destructive-commands.md)).
 - **Credentials** come from the documented environment variables or the Keychain. Flag any step that writes a secret to disk, prints it, or puts it in a file that will be committed.
+- **Changing what a Destructive Command covers** takes an ADR 0003 edit, a matching glossary edit and a matching update to `DESTRUCTIVE_ACTION` in `scripts/check-skills.mjs`, all in one PR. HCL that declares a destructive action, used to teach plan review what to block, lives under `evals/`, which `check-skills` doesn't scan.
 - **Jamf Pro access** goes through `jamf-cli` only ([ADR 0002](docs/adr/0002-complement-jamf-cli-skills.md)).
+- **Terraform Skills** keep the agent away from the live Platform, as ADR 0002 describes. `check-skills` already checks `allowed-tools`. Flag any step in which the agent itself runs `plan`, `apply`, `destroy` or `import`, opens state or `.tfvars` files, or reads `terraform show -json` output.
 
 ## Bundled scripts
 
