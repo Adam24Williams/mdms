@@ -41,11 +41,15 @@ A Skill in which the agent itself changes state on a live Platform, always after
 _Avoid_: action skill, mutating skill
 
 **Change Plan**:
-The statement a Write Skill presents before acting: which object changes, how, its scope, and how many devices are affected.
+The statement a Write Skill presents before acting: which object changes, how, its scope, and how many devices are affected. Not a Terraform plan: a Change Plan precedes a change the agent itself makes.
 _Avoid_: preview, dry run, diff
 
+**Terraform plan**:
+The set of creates, updates, replacements and deletes that Terraform computes for a configuration against a live Platform.
+_Avoid_: Change Plan, diff
+
 **Destructive Command**:
-A device command that erases, locks, or unmanages devices, or bulk-deletes device records; no Skill ever sends one.
+A device command that erases, locks (including Lost Mode), clears passcodes on, or unmanages devices, or bulk-deletes device records; no Skill ever sends one.
 _Avoid_: dangerous action, risky command
 
 **Verified Version**:
