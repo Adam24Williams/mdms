@@ -22,6 +22,10 @@ _Avoid_: using "MDM" to mean the Platform itself
 The person who operates a Platform and uses the skills.
 _Avoid_: user (ambiguous with end users of managed devices), operator
 
+**End User**:
+The person who uses a managed device, as opposed to the Admin.
+_Avoid_: user, customer, employee
+
 ### Skills
 
 **Skill**:
@@ -63,6 +67,10 @@ _Avoid_: supported version, compatible version
 **Environment Profile**:
 The recorded facts about the Platforms an Admin team runs and how they run them, Instance by Instance, that Skills consult instead of guessing. Never holds credentials or device and user identifiers.
 _Avoid_: config, context, settings, "environment" or "profile" on its own (ambiguous with environment variables and configuration profiles)
+
+**Convention**:
+A team's recorded way of naming or structuring Platform objects, kept in the Environment Profile. A Skill follows a Convention over its own default.
+_Avoid_: standard, best practice, house style
 
 **Setup Interview**:
 The Skill that builds or refreshes an Environment Profile: it detects what it can and asks the Admin only for the rest.
