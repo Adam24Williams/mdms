@@ -39,9 +39,12 @@ jobs:
 
       - name: zsh syntax check
         run: |
-          files=$(find plugins -type f -name '*.zsh')
+          files=$(find plugins scripts tests -type f -name '*.zsh')
           if [ -z "$files" ]; then echo "No zsh scripts to check"; exit 0; fi
           for f in $files; do zsh -n "$f"; done
+
+      - name: Script fixture tests
+        run: zsh tests/run.zsh
 
       - name: plutil -lint sample profiles
         run: |
