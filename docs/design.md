@@ -47,6 +47,37 @@ Settled design for the `mdms` Marketplace. Vocabulary is defined in [GLOSSARY.md
 - **Fleet:** through `fleetctl` where it covers the task, otherwise bundled zsh + `curl` + `jq` scripts (`jq` ships with macOS 15+).
 - **Credentials:** environment variables `JAMF_URL`, `JAMF_CLIENT_ID`, `JAMF_CLIENT_SECRET`, `FLEET_URL` and `FLEET_API_TOKEN`, with an optional Keychain helper. Credentials are never written to disk or committed. Each Skill documents the least-privilege API role it needs.
 
+## Environment Profile
+
+Decided in [ADR 0006](adr/0006-environment-profile-file-gated-on-platform-skill.md).
+
+- **Packaging:** each Plugin gets its own Setup Interview Skill (`jamf-pro-setup`, `fleet-setup`, `apple-setup`), added only once a Skill in that Plugin needs it. Each one writes only its own Plugin's section of the Environment Profile.
+- **Location:** the Environment Profile is Markdown at `.mdms/environment-profile.md` in the Team Repo. It is committed and reviewed like any other change.
+  - The file has one `##` heading per Plugin, with Instances listed under labels (`production`, `sandbox`).
+  - The path and headings are a contract with the Skills that read the file, so renaming either is a breaking change.
+  - Outside a repo, such as in claude.ai, the Setup Interview prints the same content for the Admin to paste into project instructions.
+- **Detect before asking:** the Setup Interview is a Read Skill and asks the Admin only for what it can't detect. Its only write is the Environment Profile file, which the Admin commits. It may detect from:
+  - local tool versions (`jamf-cli`, `fleetctl`, `terraform`);
+  - Terraform `.terraform.lock.hcl` and `required_providers` (never `*.tfstate*` or `*.tfvars`);
+  - the Fleet GitOps layout;
+  - one read-only query per Instance for its server version and license tier.
+
+  It does no device, user or object inventory, which belongs to `jamf-cli-skills` ([ADR 0002](adr/0002-complement-jamf-cli-skills.md)).
+- **Contents:**
+  - Platform and version, hosting (Jamf Cloud or on-prem; Fleet self-hosted or Fleet-managed) and license tier.
+  - Managed OS families and minimum supported OS versions.
+  - Terraform provider and CLI, and whether Fleet GitOps is used and where.
+  - Naming conventions, and whether a sandbox exists.
+  - A `recorded-on` date for each fact.
+- **Never in the file:** credentials, server URLs or tenant names (those live in environment variables), device or user identifiers, and device counts.
+- **Re-running:** the Setup Interview re-detects what it can, updates the file in place, shows the Admin which facts changed and asks only about facts that are new or missing.
+- **Triggering:** the Setup Interview runs only on an explicit request. Other Skills mention it by name and never invoke it.
+- **Reading the profile:** in every other Skill the Environment Profile is optional.
+  - If the file exists, the Skill reads it.
+  - If a fact the Skill needs is missing, it asks the Admin for that fact, mentions the Setup Interview once, and carries on.
+  - When a version decides the answer and detection is cheap, the Skill re-detects it rather than trusting the file.
+  - When the answer depends on which Instance a task targets, the Skill asks.
+
 ## Quality
 
 - Each Skill records its Verified Version in `metadata`. For Jamf Skills that includes the `jamf-cli` version. Terraform Skills record the provider, Terraform CLI and Jamf Pro versions instead. Their plan-review evals use text plans recorded from the maintainer's Jamf Pro sandbox, with secrets and identifiers scrubbed. CI flags any Skill that hasn't been re-verified in about 6 months.
@@ -77,5 +108,7 @@ These Skills are candidates: each ships only if it fixes a baseline failure ([AD
    - `jamf-pro-terraform-plan-review`: flags deletes and replacements that reach devices (with scope), Destructive Command actions, drift from GUI edits, post-import removal noise and forced replacements.
    - `jamf-pro-terraform-authoring`: `jamfplatform` HCL, covering provider pinning, OAuth client and least-privilege permissions, references between objects, scripts kept out of inline strings, and Jamf Cloud propagation delay.
    - `jamf-pro-terraform-adoption`: bringing an existing instance under Terraform with jamformer (run by the Admin), cleaning up generated HCL, the first plan after import, and moving a configuration from `jamfpro` to `jamfplatform` (a provider move, not an instance migration).
+
+A Plugin's Setup Interview ships alongside its first Skill whose baseline fails because an environment fact is missing (see [Environment Profile](#environment-profile)).
 
 Skill names above are working names.

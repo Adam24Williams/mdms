@@ -10,6 +10,10 @@ A collection of agent skills that help device-management administrators do day-t
 A device-management product an admin operates and that skills target, such as Jamf Pro or Fleet.
 _Avoid_: MDM (as the umbrella term), vendor, tool, server
 
+**Instance**:
+One deployment of a Platform that an Admin team runs, such as a production Jamf Pro and its sandbox.
+_Avoid_: server, tenant, environment
+
 **MDM**:
 The device-management protocol defined by an OS vendor (Apple MDM, Windows MDM) that a Platform speaks to enroll and command devices.
 _Avoid_: using "MDM" to mean the Platform itself
@@ -55,6 +59,14 @@ _Avoid_: dangerous action, risky command
 **Verified Version**:
 The Platform version a Skill was last checked against.
 _Avoid_: supported version, compatible version
+
+**Environment Profile**:
+The recorded facts about the Platforms an Admin team runs and how they run them, Instance by Instance, that Skills consult instead of guessing. Never holds credentials or device and user identifiers.
+_Avoid_: config, context, settings, "environment" or "profile" on its own (ambiguous with environment variables and configuration profiles)
+
+**Setup Interview**:
+The Skill that builds or refreshes an Environment Profile: it detects what it can and asks the Admin only for the rest.
+_Avoid_: onboarding, wizard, intro
 
 ### Distribution
 

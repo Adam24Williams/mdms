@@ -12,7 +12,8 @@ failed=0
 check() {
   local name=$1 case=$2 want=$3; shift 3
   local out rc ok=1 p
-  out=$(cd $repo && node scripts/check-skills.mjs $fx/$case 2>&1); rc=$?
+  # Unset GITHUB_ACTIONS so CI gets the same plain "ERROR file: msg" lines as a local run.
+  out=$(cd $repo && env -u GITHUB_ACTIONS node scripts/check-skills.mjs $fx/$case 2>&1); rc=$?
   [[ $rc == $want ]] || { ok=0; print -r -- "  exit $rc, expected $want" }
   for p in "$@"; do
     print -r -- "$out" | grep -Eq -- "$p" || { ok=0; print -r -- "  missing output: $p" }
