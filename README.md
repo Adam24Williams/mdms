@@ -2,7 +2,7 @@
 
 Agent skills for device-management admins. Starts with **Jamf Pro** and **Fleet**, Apple devices first.
 
-> Status: early development. No Plugin has shipped a release yet.
+> Status: early development. `apple-shared` v0.1.0 is released; `jamf-pro` and `fleet` have no release yet.
 
 ## Plugins
 
