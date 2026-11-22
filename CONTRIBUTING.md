@@ -26,6 +26,7 @@ Eval runs use your own Claude credentials and cost money. [docs/evals.md](docs/e
 - Skills that send a Destructive Command ([ADR 0003](docs/adr/0003-no-destructive-commands.md)).
 - Jamf Pro Skills that call the API directly instead of through `jamf-cli` ([ADR 0002](docs/adr/0002-complement-jamf-cli-skills.md)).
 - Jamf Pro audit, backup, bulk, migration or reporting Skills. `jamf-cli-skills` covers those.
+- Terraform Skills that run `plan`, `apply`, `destroy` or `import` against a live Platform, or that read state or `.tfvars` files ([ADR 0002](docs/adr/0002-complement-jamf-cli-skills.md)).
 
 ## SKILL.md template
 
@@ -56,7 +57,7 @@ metadata:
 ```
 
 - `description`: starts with "Use when" and names only the triggers, never the Skill's steps. An agent that reads a summary of the steps may follow the summary and skip the body. CI checks the prefix.
-- `verified-against`: the Platform version you tested with. For Jamf Pro Skills, include the `jamf-cli` version too (`"Jamf Pro 11.x, jamf-cli 1.38"`). Shared Skills name the macOS/iOS versions.
+- `verified-against`: the Platform version you tested with. For Jamf Pro Skills, include the `jamf-cli` version too (`"Jamf Pro 11.x, jamf-cli 1.38"`). Terraform Skills name the provider and CLI instead (`"Jamf Pro 11.x, jamfplatform 1.10.0, Terraform 1.14"`). Shared Skills name the macOS/iOS versions.
 - `verified-on`: the date you last checked the Skill against a live Platform (`YYYY-MM-DD`). CI warns once this is more than about 6 months old.
 
 ## Read Skills and Write Skills
